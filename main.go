@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -14,7 +13,36 @@ import (
 */
 
 type stats struct {
-	median int
+	avg int
+}
+
+const JOB_COUNT int = 17
+const DELAY int = 500
+
+func schedule_jobs(url string, wg *sync.WaitGroup, ch *chan time.Duration) {
+	count := 0
+
+	for count < JOB_COUNT {
+		time.Sleep(time.Duration(DELAY) * time.Millisecond)
+
+		go func() {
+			start := time.Now()
+
+			_, err := http.Get(url)
+			if err != nil {
+				panic("Request Failed")
+			}
+
+			elapsed := time.Since(start)
+
+			wg.Done()
+			fmt.Println("Job Done")
+
+			*ch <- elapsed
+		}()
+
+		count++
+	}
 }
 
 func main() {
@@ -33,58 +61,28 @@ func main() {
 	*/
 
 	url := os.Args[1]
-	job_count := 17
-	delay := 500
 
 	var wg sync.WaitGroup
-	wg.Add(job_count)
+	wg.Add(JOB_COUNT)
 
-	time_chan := make(chan time.Duration, job_count)
-	count := 0
-
-	for count < job_count {
-		time.Sleep(time.Duration(delay) * time.Millisecond)
-
-		go func() {
-			start := time.Now()
-
-			fmt.Println("Job Started")
-
-			_, err := http.Get(url)
-			if err != nil {
-				panic("Request falhou")
-			}
-
-			elapsed := time.Since(start)
-			
-			wg.Done()
-			
-			time_chan <- elapsed
-		}()
-
-		count++
-	}
+	time_chan := make(chan time.Duration, JOB_COUNT)
+	
+	schedule_jobs(url, &wg, &time_chan)
 
 	wg.Wait()
 	close(time_chan)
 
 	total_elapsed := 0
 	for elapsed := range time_chan {
-		fmt.Println(elapsed)
 		elapsed_mili := time.Duration.Milliseconds(elapsed)
 		total_elapsed += int(elapsed_mili)
-	}	
+	}
 
-	median := total_elapsed / job_count
-	
+	avg := total_elapsed / JOB_COUNT
+
 	stats := stats{
-		median: median,
+		avg: avg,
 	}
-	
-	json_stats, err := json.Marshal(stats)
-	if err != nil{
-		panic("Unable to parse stats struct")
-	}
-	
-	fmt.Println(json_stats)
+
+	fmt.Printf("\n%+v\n", stats)
 }
