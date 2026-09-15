@@ -9,20 +9,22 @@ import (
 )
 
 /*
+	==========
 	BENCHKITTY
+	==========
 */
 
 type stats struct {
 	avg int
 }
 
-const JOB_COUNT int = 17
+const REQ_COUNT int = 17
 const DELAY int = 500
 
 func schedule_jobs(url string, wg *sync.WaitGroup, ch *chan time.Duration) {
 	count := 0
 
-	for count < JOB_COUNT {
+	for count < REQ_COUNT {
 		time.Sleep(time.Duration(DELAY) * time.Millisecond)
 
 		go func() {
@@ -46,27 +48,13 @@ func schedule_jobs(url string, wg *sync.WaitGroup, ch *chan time.Duration) {
 }
 
 func main() {
-	/*
-		recebo url como parametro
-
-		posso dizer quantidade requests
-		posso determinar body
-		posso dizer quantidade de jobs paralelos
-		posso salvar métrica em CSV
-		posso dizer o tipo do request
-		posso determinar timeout
-
-		retorno métrica
-		existe a possibilidade de uma TUI bonitinha
-	*/
-
 	url := os.Args[1]
 
 	var wg sync.WaitGroup
-	wg.Add(JOB_COUNT)
+	wg.Add(REQ_COUNT)
 
-	time_chan := make(chan time.Duration, JOB_COUNT)
-	
+	time_chan := make(chan time.Duration, REQ_COUNT)
+
 	schedule_jobs(url, &wg, &time_chan)
 
 	wg.Wait()
@@ -78,7 +66,7 @@ func main() {
 		total_elapsed += int(elapsed_mili)
 	}
 
-	avg := total_elapsed / JOB_COUNT
+	avg := total_elapsed / REQ_COUNT
 
 	stats := stats{
 		avg: avg,

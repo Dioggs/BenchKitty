@@ -1,0 +1,7 @@
+[x] recebo url como parametro
+[x] posso dizer quantidade requests
+[] posso determinar body
+[] posso dizer o tipo do request
+[] posso determinar timeout
+[] retorno métrica no stdio ou CSV
+[] TUI
