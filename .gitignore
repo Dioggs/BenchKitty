@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# Go Binaries and Build Artifacts
+# ---------------------------------------------------------------------------
+# Compiled binaries/executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binaries (built with 'go test -c')
+*.test
+
+# Output of the go coverage tool (e.g., from 'go test -coverprofile=c.out')
+*.out
+*.coverprofile
+profile.cov
+
+# ---------------------------------------------------------------------------
+# Dependency and Workspace Management
+# ---------------------------------------------------------------------------
+# Go workspaces file (keeps local path overrides out of the shared repo)
+go.work
+go.work.sum
+
+# Standard Go modules should NOT be ignored (keep go.mod and go.sum).
+# Uncomment the line below ONLY if you explicitly want to vendor dependencies.
+# vendor/
+
+# ---------------------------------------------------------------------------
+# Environment Variables & Secrets
+# ---------------------------------------------------------------------------
+# Never commit sensitive local environment variables or API keys
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------------
+# IDEs and Editors
+# ---------------------------------------------------------------------------
+# JetBrains (GoLand, IntelliJ)
+.idea/
+*.iwws
+
+# Visual Studio Code
+.vscode/
+
+# Vim / Emacs swap files
+*~
+*.swp
+
+# ---------------------------------------------------------------------------
+# Operating System files
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db

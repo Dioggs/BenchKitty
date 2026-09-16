@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -19,13 +20,12 @@ type stats struct {
 }
 
 const REQ_COUNT int = 17
-const DELAY int = 500
 
-func schedule_jobs(url string, wg *sync.WaitGroup, ch *chan time.Duration) {
+func schedule_jobs(url string, delay int, wg *sync.WaitGroup, ch *chan time.Duration) {
 	count := 0
 
 	for count < REQ_COUNT {
-		time.Sleep(time.Duration(DELAY) * time.Millisecond)
+		time.Sleep(time.Duration(delay) * time.Millisecond)
 
 		go func() {
 			start := time.Now()
@@ -37,10 +37,10 @@ func schedule_jobs(url string, wg *sync.WaitGroup, ch *chan time.Duration) {
 
 			elapsed := time.Since(start)
 
-			wg.Done()
-			fmt.Println("Job Done")
+			fmt.Printf("Job Done")
 
 			*ch <- elapsed
+			wg.Done()
 		}()
 
 		count++
@@ -48,14 +48,19 @@ func schedule_jobs(url string, wg *sync.WaitGroup, ch *chan time.Duration) {
 }
 
 func main() {
-	url := os.Args[1]
+	delay, err := strconv.Atoi(os.Args[1])
+	if err != nil {
+		panic("Unable to parse delay")
+	}
+
+	url := os.Args[2]
 
 	var wg sync.WaitGroup
 	wg.Add(REQ_COUNT)
 
 	time_chan := make(chan time.Duration, REQ_COUNT)
 
-	schedule_jobs(url, &wg, &time_chan)
+	schedule_jobs(url, delay, &wg, &time_chan)
 
 	wg.Wait()
 	close(time_chan)

@@ -1,8 +1,12 @@
+====TODO====
 [x] recebo url como parametro
 [x] posso dizer quantidade requests
-[] posso determinar timeout
+[x] posso determinar delay
 [] retorno métrica no stdio ou CSV
 [] implementar parametros de comando melhores
 [] posso dizer o tipo do request
 [] posso determinar body
 [] TUI
+
+====NOTES====
+https://jsonplaceholder.typicode.com/todos/1
