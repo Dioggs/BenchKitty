@@ -1,12 +1,20 @@
+====IDEIA====
+input -> exe -r 20 -d 100 -o /path/to/csv -t GET https://url.com
+
+-r == request amount (defaults to 100)
+-d == delay between every request call (defaults to 1000ms) 
+-o == outpath of benchmark csv (defaults to terminal)
+-t == method used on the url (defaults to GET)
+https://url.com == url called
+
 ====TODO====
-[x] recebo url como parametro
-[x] posso dizer quantidade requests
-[x] posso determinar delay
-[] retorno métrica no stdio ou CSV
-[] implementar parametros de comando melhores
-[] posso dizer o tipo do request
-[] posso determinar body
-[] TUI
+[] implement command params
+[] refactor csv output logic
+[] accept url method as param
+[] accept body as param
+[] implement detailed view of every url call
+[] create BenchKitty website
 
 ====NOTES====
 https://jsonplaceholder.typicode.com/todos/1
+
