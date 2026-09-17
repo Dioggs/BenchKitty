@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"net/http"
 	"os"
@@ -37,7 +38,7 @@ func schedule_jobs(url string, delay int, wg *sync.WaitGroup, ch *chan time.Dura
 
 			elapsed := time.Since(start)
 
-			fmt.Printf("Job Done")
+			fmt.Println("Job Done")
 
 			*ch <- elapsed
 			wg.Done()
@@ -53,7 +54,8 @@ func main() {
 		panic("Unable to parse delay")
 	}
 
-	url := os.Args[2]
+	output := os.Args[2]
+	url := os.Args[3]
 
 	var wg sync.WaitGroup
 	wg.Add(REQ_COUNT)
@@ -77,5 +79,24 @@ func main() {
 		avg: avg,
 	}
 
-	fmt.Printf("\n%+v\n", stats)
+	switch output {
+	case "term":
+		fmt.Printf("\n%+v\n", stats)
+	case "csv":
+		file, err := os.Create("benchmark.csv")
+		if err != nil {
+			panic("failed to create file")
+		}
+		defer file.Close()
+
+		writer := csv.NewWriter(file)
+		var data [][]string = [][]string{{"AVG"}, {strconv.Itoa(stats.avg)}}
+
+		if err := writer.WriteAll(data); err != nil {
+			panic("failed to write data")
+		}
+	default:
+		panic("Invalid output format")
+	}
+
 }
