@@ -16,16 +16,55 @@ import (
 	==========
 */
 
-type stats struct {
+type benchmark struct {
 	avg int
 }
 
-const REQ_COUNT int = 17
+type benchParams struct {
+	url        string
+	method     string
+	req_count  int
+	delay      int
+	output_dir string
+}
 
-func schedule_jobs(url string, delay int, wg *sync.WaitGroup, ch *chan time.Duration) {
+const reqCount int = 17
+var cmdParams []string = []string{
+	"-r",
+	"-d",
+	"-o",
+	"-t",
+}
+
+func isValidCmdParam(cmdParam string) bool {
+	return true
+}
+
+func isValidCmdValue(cmdValue string) bool {
+	return true	
+}
+
+func buildParams(args []string) benchParams {
+	benchParams := benchParams{}
+	
+	for _, arg := range args {
+		/*
+			se for cmdParam, pega o proximo cmdValue e valida ele		
+			se for valido, pula pro proximo param
+			se não for valido, panic
+			
+			se for baseValue, valida ele e segue (permitimos só url por enquanto)
+		*/
+		fmt.Println(arg)
+	}
+
+	return benchParams
+}
+
+func scheduleJobs(url string, delay int, wg *sync.WaitGroup, ch *chan time.Duration) {
 	count := 0
 
-	for count < REQ_COUNT {
+	for count < reqCount {
 		time.Sleep(time.Duration(delay) * time.Millisecond)
 
 		go func() {
@@ -58,11 +97,11 @@ func main() {
 	url := os.Args[3]
 
 	var wg sync.WaitGroup
-	wg.Add(REQ_COUNT)
+	wg.Add(reqCount)
 
-	time_chan := make(chan time.Duration, REQ_COUNT)
+	time_chan := make(chan time.Duration, reqCount)
 
-	schedule_jobs(url, delay, &wg, &time_chan)
+	scheduleJobs(url, delay, &wg, &time_chan)
 
 	wg.Wait()
 	close(time_chan)
@@ -73,15 +112,15 @@ func main() {
 		total_elapsed += int(elapsed_mili)
 	}
 
-	avg := total_elapsed / REQ_COUNT
+	avg := total_elapsed / reqCount 
 
-	stats := stats{
+	benchmark := benchmark{
 		avg: avg,
 	}
 
 	switch output {
 	case "term":
-		fmt.Printf("\n%+v\n", stats)
+		fmt.Printf("\n%+v\n", benchmark)
 	case "csv":
 		file, err := os.Create("benchmark.csv")
 		if err != nil {
@@ -90,7 +129,7 @@ func main() {
 		defer file.Close()
 
 		writer := csv.NewWriter(file)
-		var data [][]string = [][]string{{"AVG"}, {strconv.Itoa(stats.avg)}}
+		var data [][]string = [][]string{{"AVG"}, {strconv.Itoa(benchmark.avg)}}
 
 		if err := writer.WriteAll(data); err != nil {
 			panic("failed to write data")
