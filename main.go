@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"sync"
 	"time"
@@ -20,15 +22,10 @@ type benchmark struct {
 	avg int
 }
 
-type benchParams struct {
-	url        string
-	method     string
-	req_count  int
-	delay      int
-	output_dir string
-}
+type benchParams map[string]string
 
 const reqCount int = 17
+
 var cmdParams []string = []string{
 	"-r",
 	"-d",
@@ -37,25 +34,43 @@ var cmdParams []string = []string{
 }
 
 func isValidCmdParam(cmdParam string) bool {
-	return true
+	return slices.Contains(cmdParams, cmdParam)
 }
 
 func isValidCmdValue(cmdValue string) bool {
-	return true	
+	return true
+}
+
+func peek(args []string, i int) (string, error) {
+	len := len(args)
+
+	if i+1 >= len {
+		return "", errors.New("You have reached the end of the array")
+	}
+
+	return args[i+1], nil
 }
 
 func buildParams(args []string) benchParams {
-	benchParams := benchParams{}
-	
-	for _, arg := range args {
-		/*
-			se for cmdParam, pega o proximo cmdValue e valida ele		
-			se for valido, pula pro proximo param
-			se não for valido, panic
+	benchParams := make(benchParams)
+	len := len(args)
+
+	for i := 0; i < len; i++ {
+		arg := args[i]
+		if isValidCmdParam(arg) {
+			val, err := peek(args, i)
+			if err != nil {
+				panic("Missing value for parameter " + arg)
+			}
+
+			if !isValidCmdValue(val) {
+				panic("Invalid value for parameter " + arg)
+			}
+
+			benchParams[arg] = val
+		} else {
 			
-			se for baseValue, valida ele e segue (permitimos só url por enquanto)
-		*/
-		fmt.Println(arg)
+		}
 	}
 
 	return benchParams
@@ -87,7 +102,12 @@ func scheduleJobs(url string, delay int, wg *sync.WaitGroup, ch *chan time.Durat
 	}
 }
 
-func main() {
+func main(){
+	params := buildParams(os.Args)
+	fmt.Println(params)
+}
+
+func main2() {
 	delay, err := strconv.Atoi(os.Args[1])
 	if err != nil {
 		panic("Unable to parse delay")
@@ -112,7 +132,7 @@ func main() {
 		total_elapsed += int(elapsed_mili)
 	}
 
-	avg := total_elapsed / reqCount 
+	avg := total_elapsed / reqCount
 
 	benchmark := benchmark{
 		avg: avg,

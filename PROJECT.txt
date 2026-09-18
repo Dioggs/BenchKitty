@@ -9,6 +9,7 @@ https://url.com == url called
 
 ====TODO====
 [] implement command params
+[] implement tests
 [] refactor csv output logic
 [] accept url method as param
 [] accept body as param
