@@ -55,23 +55,12 @@ func buildParams(args []string) benchParams {
 	benchParams := make(benchParams)
 	len := len(args)
 
-	for i := 0; i < len; i++ {
-		arg := args[i]
-		if isValidCmdParam(arg) {
-			val, err := peek(args, i)
-			if err != nil {
-				panic("Missing value for parameter " + arg)
-			}
+	/*
+	arranco os parametros	
+	separo a base do comando e os parametros
+	monto dicionario com os valores 
+	*/
 
-			if !isValidCmdValue(val) {
-				panic("Invalid value for parameter " + arg)
-			}
-
-			benchParams[arg] = val
-		} else {
-			
-		}
-	}
 
 	return benchParams
 }
