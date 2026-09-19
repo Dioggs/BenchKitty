@@ -4,10 +4,12 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -26,41 +28,80 @@ type benchParams map[string]string
 
 const reqCount int = 17
 
-var cmdParams []string = []string{
-	"-r",
-	"-d",
-	"-o",
-	"-t",
+func isValidInt(s string) bool {
+	_, err := strconv.Atoi(s)
+	return err == nil
 }
 
-func isValidCmdParam(cmdParam string) bool {
-	return slices.Contains(cmdParams, cmdParam)
+func isValidPath(s string) bool {
+	return fs.ValidPath(s)	
 }
 
-func isValidCmdValue(cmdValue string) bool {
-	return true
-}
-
-func peek(args []string, i int) (string, error) {
-	len := len(args)
-
-	if i+1 >= len {
-		return "", errors.New("You have reached the end of the array")
+func isValidHttpMethod(s string) bool {
+	methods := []string {
+		"GET",
+		"POST",
+		"PUT",
+		"PATCH",
+		"DELETE",
 	}
-
-	return args[i+1], nil
+	
+	return slices.Contains(methods, s)
+}
+ 
+func getErrMsg(cmdParam string, cmdValue string) string {
+	return fmt.Sprintf("Invalid value %v for command param %v", cmdValue, cmdParam)
 }
 
-func buildParams(args []string) benchParams {
+func validateCmdParam(cmdParam string, cmdValue string) error {
+	switch cmdParam {
+	case "-d":
+		res := isValidInt(cmdValue)
+		if !res {
+			return errors.New(getErrMsg(cmdParam, cmdValue))
+		}
+	case "-r": 
+		res := isValidInt(cmdValue)
+		if !res {
+			return errors.New(getErrMsg(cmdParam, cmdValue))
+		}
+	case "-o":
+		res := isValidPath(cmdValue)
+		if !res {
+			return errors.New(getErrMsg(cmdParam, cmdValue))
+		}
+	case "-t":
+		res := isValidHttpMethod(cmdValue)
+		if !res {
+			return errors.New(getErrMsg(cmdParam, cmdValue))
+		}
+	default: 
+		return errors.New("Unsupported command parameter")
+	}	
+	
+	return nil
+}
+
+func buildBenchParams(args []string) benchParams {
 	benchParams := make(benchParams)
 	len := len(args)
 
-	/*
-	arranco os parametros	
-	separo a base do comando e os parametros
-	monto dicionario com os valores 
-	*/
-
+	for i:=0; i<len; i+=2{
+		arg := args[i]
+		if strings.Contains(arg, "-") {
+			if i + 1 >= len {
+				panic("Missing value for cmd param " + arg)
+			}	
+			
+			val := args[i + 1]
+			
+			err := validateCmdParam(arg, val)
+			if err != nil {
+				panic(err)
+			}
+			benchParams[arg] = val
+		}	
+	}
 
 	return benchParams
 }
@@ -92,7 +133,8 @@ func scheduleJobs(url string, delay int, wg *sync.WaitGroup, ch *chan time.Durat
 }
 
 func main(){
-	params := buildParams(os.Args)
+	args := os.Args[1:]
+	params := buildBenchParams(args)
 	fmt.Println(params)
 }
 
