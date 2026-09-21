@@ -1,11 +1,14 @@
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
 	"slices"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -125,12 +128,8 @@ func main() {
 		avg: avg,
 	}
 
-	fmt.Printf("\n%+v\n", benchmark)
-
-	/* switch output {
-	case "term":
-		fmt.Printf("\n%+v\n", benchmark)
-	case "csv":
+	if params.out != "" {
+		// TODO: handle "params.out" as a relative path
 		file, err := os.Create("benchmark.csv")
 		if err != nil {
 			panic("failed to create file")
@@ -143,8 +142,9 @@ func main() {
 		if err := writer.WriteAll(data); err != nil {
 			panic("failed to write data")
 		}
-	default:
-		panic("Invalid output format")
-	} */
-
+		
+		return
+	}
+	
+	fmt.Printf("\n%+v\n", benchmark)
 }
