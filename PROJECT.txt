@@ -15,6 +15,7 @@ https://url.com == url called
 [] accept body as param
 [] implement detailed view of every url call
 [] create BenchKitty website
+[] implement better error handling
 
 ====NOTES====
 https://jsonplaceholder.typicode.com/todos/1

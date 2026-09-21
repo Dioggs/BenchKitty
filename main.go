@@ -1,15 +1,11 @@
 package main
 
 import (
-	"encoding/csv"
-	"errors"
+	"flag"
 	"fmt"
 	"io/fs"
 	"net/http"
-	"os"
 	"slices"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -24,98 +20,40 @@ type benchmark struct {
 	avg int
 }
 
-type benchParams map[string]string
+type benchParams struct {
+	url      string
+	method   string
+	delay    int
+	reqCount int
+	out      string
+}
 
-const reqCount int = 17
-
-func isValidInt(s string) bool {
-	_, err := strconv.Atoi(s)
-	return err == nil
+var methods = []string{
+	"GET",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE",
 }
 
 func isValidPath(s string) bool {
-	return fs.ValidPath(s)	
+	return fs.ValidPath(s)
 }
 
 func isValidHttpMethod(s string) bool {
-	methods := []string {
-		"GET",
-		"POST",
-		"PUT",
-		"PATCH",
-		"DELETE",
-	}
-	
 	return slices.Contains(methods, s)
 }
- 
-func getErrMsg(cmdParam string, cmdValue string) string {
-	return fmt.Sprintf("Invalid value %v for command param %v", cmdValue, cmdParam)
-}
 
-func validateCmdParam(cmdParam string, cmdValue string) error {
-	switch cmdParam {
-	case "-d":
-		res := isValidInt(cmdValue)
-		if !res {
-			return errors.New(getErrMsg(cmdParam, cmdValue))
-		}
-	case "-r": 
-		res := isValidInt(cmdValue)
-		if !res {
-			return errors.New(getErrMsg(cmdParam, cmdValue))
-		}
-	case "-o":
-		res := isValidPath(cmdValue)
-		if !res {
-			return errors.New(getErrMsg(cmdParam, cmdValue))
-		}
-	case "-t":
-		res := isValidHttpMethod(cmdValue)
-		if !res {
-			return errors.New(getErrMsg(cmdParam, cmdValue))
-		}
-	default: 
-		return errors.New("Unsupported command parameter")
-	}	
-	
-	return nil
-}
-
-func buildBenchParams(args []string) benchParams {
-	benchParams := make(benchParams)
-	len := len(args)
-
-	for i:=0; i<len; i+=2{
-		arg := args[i]
-		if strings.Contains(arg, "-") {
-			if i + 1 >= len {
-				panic("Missing value for cmd param " + arg)
-			}	
-			
-			val := args[i + 1]
-			
-			err := validateCmdParam(arg, val)
-			if err != nil {
-				panic(err)
-			}
-			benchParams[arg] = val
-		}	
-	}
-
-	return benchParams
-}
-
-func scheduleJobs(url string, delay int, wg *sync.WaitGroup, ch *chan time.Duration) {
+func scheduleJobs(p benchParams, wg *sync.WaitGroup, ch *chan time.Duration) {
 	count := 0
 
-	for count < reqCount {
-		time.Sleep(time.Duration(delay) * time.Millisecond)
+	for count < p.reqCount {
+		time.Sleep(time.Duration(p.delay) * time.Millisecond)
 
 		go func() {
 			start := time.Now()
 
-			_, err := http.Get(url)
+			_, err := http.Get(p.url)
 			if err != nil {
 				panic("Request Failed")
 			}
@@ -132,27 +70,45 @@ func scheduleJobs(url string, delay int, wg *sync.WaitGroup, ch *chan time.Durat
 	}
 }
 
-func main(){
-	args := os.Args[1:]
-	params := buildBenchParams(args)
-	fmt.Println(params)
-}
+func main() {
+	reqCount := flag.Int("r", 100, "request amount")
+	delay := flag.Int("d", 1000, "delay between every request call in ms")
+	out := flag.String("o", "", "output path for the benchmark csv (defaults to terminal)")
+	method := flag.String("t", "GET", "http method used on the url")
 
-func main2() {
-	delay, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		panic("Unable to parse delay")
+	flag.Parse()
+
+	url := flag.Arg(0)
+	if url == "" {
+		fmt.Println("Missing url")
+		flag.Usage()
+		return
 	}
 
-	output := os.Args[2]
-	url := os.Args[3]
+	if !isValidHttpMethod(*method) {
+		fmt.Printf("Invalid value %v for command param -t\n", *method)
+		return
+	}
+
+	if *out != "" && !isValidPath(*out) {
+		fmt.Printf("Invalid value %v for command param -o\n", *out)
+		return
+	}
+
+	params := benchParams{
+		url:      url,
+		method:   *method,
+		delay:    *delay,
+		reqCount: *reqCount,
+		out:      *out,
+	}
 
 	var wg sync.WaitGroup
-	wg.Add(reqCount)
+	wg.Add(params.reqCount)
 
-	time_chan := make(chan time.Duration, reqCount)
+	time_chan := make(chan time.Duration, params.reqCount)
 
-	scheduleJobs(url, delay, &wg, &time_chan)
+	scheduleJobs(params, &wg, &time_chan)
 
 	wg.Wait()
 	close(time_chan)
@@ -163,13 +119,15 @@ func main2() {
 		total_elapsed += int(elapsed_mili)
 	}
 
-	avg := total_elapsed / reqCount
+	avg := total_elapsed / params.reqCount
 
 	benchmark := benchmark{
 		avg: avg,
 	}
 
-	switch output {
+	fmt.Printf("\n%+v\n", benchmark)
+
+	/* switch output {
 	case "term":
 		fmt.Printf("\n%+v\n", benchmark)
 	case "csv":
@@ -187,6 +145,6 @@ func main2() {
 		}
 	default:
 		panic("Invalid output format")
-	}
+	} */
 
 }
