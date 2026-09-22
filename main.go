@@ -4,9 +4,9 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"io/fs"
 	"net/http"
 	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"sync"
@@ -37,10 +37,6 @@ var methods = []string{
 	"PUT",
 	"PATCH",
 	"DELETE",
-}
-
-func isValidPath(s string) bool {
-	return fs.ValidPath(s)
 }
 
 func isValidHttpMethod(s string) bool {
@@ -93,11 +89,6 @@ func main() {
 		return
 	}
 
-	if *out != "" && !isValidPath(*out) {
-		fmt.Printf("Invalid value %v for command param -o\n", *out)
-		return
-	}
-
 	params := benchParams{
 		url:      url,
 		method:   *method,
@@ -129,8 +120,7 @@ func main() {
 	}
 
 	if params.out != "" {
-		// TODO: handle "params.out" as a relative path
-		file, err := os.Create("benchmark.csv")
+		file, err := os.Create(filepath.Join(params.out, "benchmark.csv"))
 		if err != nil {
 			panic("failed to create file")
 		}
@@ -142,9 +132,9 @@ func main() {
 		if err := writer.WriteAll(data); err != nil {
 			panic("failed to write data")
 		}
-		
+
 		return
 	}
-	
+
 	fmt.Printf("\n%+v\n", benchmark)
 }
