@@ -69,6 +69,37 @@ func ScheduleJobs(p benchParams, wg *sync.WaitGroup, ch *chan time.Duration) {
 	}
 }
 
+func calculateBenchmark(params benchParams, timeChan chan time.Duration) benchmark {
+	total_elapsed := 0
+	for elapsed := range timeChan {
+		elapsed_mili := time.Duration.Milliseconds(elapsed)
+		total_elapsed += int(elapsed_mili)
+	}
+
+	avg := total_elapsed / params.reqCount
+
+	benchmark := benchmark{
+		avg: avg,
+	}
+
+	return benchmark
+}
+
+func writeCSV(params benchParams, benchmark benchmark) {
+	file, err := os.Create(filepath.Join(params.out, "benchmark.csv"))
+	if err != nil {
+		panic("failed to create file")
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	var data [][]string = [][]string{{"AVG"}, {strconv.Itoa(benchmark.avg)}}
+
+	if err := writer.WriteAll(data); err != nil {
+		panic("failed to write data")
+	}
+}
+
 func main() {
 	reqCount := flag.Int("r", 100, "request amount")
 	delay := flag.Int("d", 1000, "delay between every request call in ms")
@@ -100,39 +131,17 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(params.reqCount)
 
-	time_chan := make(chan time.Duration, params.reqCount)
+	timeChan := make(chan time.Duration, params.reqCount)
 
-	ScheduleJobs(params, &wg, &time_chan)
+	ScheduleJobs(params, &wg, &timeChan)
 
 	wg.Wait()
-	close(time_chan)
+	close(timeChan)
 
-	total_elapsed := 0
-	for elapsed := range time_chan {
-		elapsed_mili := time.Duration.Milliseconds(elapsed)
-		total_elapsed += int(elapsed_mili)
-	}
-
-	avg := total_elapsed / params.reqCount
-
-	benchmark := benchmark{
-		avg: avg,
-	}
+	benchmark := calculateBenchmark(params, timeChan)
 
 	if params.out != "" {
-		file, err := os.Create(filepath.Join(params.out, "benchmark.csv"))
-		if err != nil {
-			panic("failed to create file")
-		}
-		defer file.Close()
-
-		writer := csv.NewWriter(file)
-		var data [][]string = [][]string{{"AVG"}, {strconv.Itoa(benchmark.avg)}}
-
-		if err := writer.WriteAll(data); err != nil {
-			panic("failed to write data")
-		}
-
+		writeCSV(params, benchmark)	
 		return
 	}
 
