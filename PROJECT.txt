@@ -1,4 +1,4 @@
-====IDEIA====
+====IDEA====
 input -> exe -r 20 -d 100 -o /path/to/csv -t GET https://url.com
 
 -r == request amount (defaults to 100)
