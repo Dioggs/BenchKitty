@@ -19,8 +19,15 @@ import (
 	==========
 */
 
+type statusCount map[int]string
+
 type benchmark struct {
 	avg int
+	p50 int
+	p95 int
+	rps int
+	tps int	
+	statusCount statusCount
 }
 
 type benchParams struct {
