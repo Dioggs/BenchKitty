@@ -20,3 +20,5 @@ https://url.com == url called
 ====NOTES====
 https://jsonplaceholder.typicode.com/todos/1
 
+p50, p95, p99, avg, rps, status_count, content throughput
+
