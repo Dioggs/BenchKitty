@@ -9,13 +9,14 @@ https://url.com == url called
 
 ====TODO====
 [x] implement command params
-[x] implement tests
+[] implement full benchmark
 [] refactor csv output logic
 [] accept url method as param
 [] accept body as param
 [] implement detailed view of every url call
 [] create BenchKitty website
 [] implement better error handling
+[] implement tests
 
 ====NOTES====
 https://jsonplaceholder.typicode.com/todos/1
