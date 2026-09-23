@@ -43,7 +43,7 @@ func isValidHttpMethod(s string) bool {
 	return slices.Contains(methods, s)
 }
 
-func scheduleJobs(p benchParams, wg *sync.WaitGroup, ch *chan time.Duration) {
+func ScheduleJobs(p benchParams, wg *sync.WaitGroup, ch *chan time.Duration) {
 	count := 0
 
 	for count < p.reqCount {
@@ -102,7 +102,7 @@ func main() {
 
 	time_chan := make(chan time.Duration, params.reqCount)
 
-	scheduleJobs(params, &wg, &time_chan)
+	ScheduleJobs(params, &wg, &time_chan)
 
 	wg.Wait()
 	close(time_chan)

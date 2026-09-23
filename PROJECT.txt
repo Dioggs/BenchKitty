@@ -8,7 +8,7 @@ input -> exe -r 20 -d 100 -o /path/to/csv -t GET https://url.com
 https://url.com == url called
 
 ====TODO====
-[] implement command params
+[x] implement command params
 [] implement tests
 [] refactor csv output logic
 [] accept url method as param
