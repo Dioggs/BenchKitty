@@ -18,14 +18,28 @@ func TestSchedulingOfJobs(t *testing.T) {
 	var mockWg sync.WaitGroup
 	mockWg.Add(mockBenchParams.reqCount)
 
+	start := time.Now()
 	ScheduleJobs(mockBenchParams, &mockWg, &mockChan)	
-	
+
 	mockWg.Wait()
 	close(mockChan)
+
+	elapsed := time.Since(start)
+	elapsed_mili := time.Duration.Milliseconds(elapsed)
+
+	var values []time.Duration = []time.Duration{}
+	for v := range mockChan {
+		values = append(values, v)	
+	}
 	
-	// did we execute the current amout of jobs?
-	// did all of them return data?
-	// did we take the correct amount of time?
-	// 
+	if len(values) != mockBenchParams.reqCount {
+		t.Errorf("Executed the wrong amount of jobs: Executed %v Needed %v", len(values), mockBenchParams.reqCount)	
+	}
+
+	expectedMinimumTime := mockBenchParams.reqCount * mockBenchParams.delay
+
+	if int(elapsed_mili) < expectedMinimumTime {
+		t.Errorf("Jobs took longer than needed: Expected Minimum: %v Got: %v", expectedMinimumTime, elapsed_mili)	
+	}
 }
 
