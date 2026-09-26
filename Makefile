@@ -1,2 +1,5 @@
 run:
-	go run . 500 term https://jsonplaceholder.typicode.com/todos/1
+	go run . -r 10 -d 250 https://jsonplaceholder.typicode.com/todos/1
+	
+file: 
+	go run . -r 10 -d 250 -o ./ https://jsonplaceholder.typicode.com/todos/1
