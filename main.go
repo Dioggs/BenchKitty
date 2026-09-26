@@ -76,6 +76,7 @@ func ScheduleJobs(p benchParams, wg *sync.WaitGroup, ch *chan time.Duration) {
 	}
 }
 
+// TODO: fix measurements
 func calculateBenchmark(params benchParams, timeChan chan time.Duration) benchmark {
 	var values []int
 
@@ -83,15 +84,16 @@ func calculateBenchmark(params benchParams, timeChan chan time.Duration) benchma
         values = append(values , int(time.Duration.Milliseconds(value)))
 	}
 	
+	len := len(values)
+	slices.Sort(values)
+	
 	total_elapsed := 0
 	for _, elapsed := range values {
 		total_elapsed += int(elapsed)
 	}
 
 	avg := total_elapsed / params.reqCount
-
-	slices.Sort(values)
-	middle := len(values) / 2
+	middle := len / 2
 	p50 := values[middle]
 
 	benchmark := benchmark{
