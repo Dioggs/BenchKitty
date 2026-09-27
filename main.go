@@ -25,6 +25,7 @@ type benchmark struct {
 	avg int
 	p50 int
 	p95 int
+	p99 int
 	rps int
 	tps int	
 	statusCount statusCount
@@ -66,7 +67,7 @@ func ScheduleJobs(p benchParams, wg *sync.WaitGroup, ch *chan time.Duration) {
 
 			elapsed := time.Since(start)
 
-			fmt.Println("Job Done")
+			fmt.Printf("Job Done = %vms\n", time.Duration.Milliseconds(elapsed))
 
 			*ch <- elapsed
 			wg.Done()
@@ -76,7 +77,6 @@ func ScheduleJobs(p benchParams, wg *sync.WaitGroup, ch *chan time.Duration) {
 	}
 }
 
-// TODO: fix measurements
 func calculateBenchmark(params benchParams, timeChan chan time.Duration) benchmark {
 	var values []int
 
@@ -95,10 +95,14 @@ func calculateBenchmark(params benchParams, timeChan chan time.Duration) benchma
 	avg := total_elapsed / params.reqCount
 	middle := len / 2
 	p50 := values[middle]
+	p95 := values[int(float32(len) * 0.95)]
+	p99 := values[int(float32(len) * 0.99)]
 
 	benchmark := benchmark{
 		avg: avg,
 		p50: p50,
+		p95: p95,
+		p99: p99,
 	}
 
 	return benchmark
