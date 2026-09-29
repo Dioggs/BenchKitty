@@ -1,14 +1,10 @@
 package main
 
 import (
-	"encoding/csv"
 	"flag"
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"slices"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -77,56 +73,34 @@ func ScheduleJobs(p benchParams, wg *sync.WaitGroup, ch *chan time.Duration) {
 	}
 }
 
-func calculateBenchmark(params benchParams, timeChan chan time.Duration) benchmark {
-	var values []int
-
-    for value := range timeChan{
-        values = append(values , int(time.Duration.Milliseconds(value)))
-	}
-	
+func calculateBenchmark(params benchParams, values []int) benchmark {
 	len := len(values)
-	slices.Sort(values)
-	
+	sorted := append([]int(nil), values...)
+	slices.Sort(sorted)
+
 	total_elapsed := 0
-	for _, elapsed := range values {
+	for _, elapsed := range sorted {
 		total_elapsed += int(elapsed)
 	}
 
 	avg := total_elapsed / params.reqCount
 	middle := len / 2
-	p50 := values[middle]
-	p95 := values[int(float32(len) * 0.95)]
-	p99 := values[int(float32(len) * 0.99)]
+	p50 := sorted[middle]
+	p95 := sorted[int(float32(len)*0.95)]
+	p99 := sorted[int(float32(len)*0.99)]
 
-	benchmark := benchmark{
+	return benchmark{
 		avg: avg,
 		p50: p50,
 		p95: p95,
 		p99: p99,
-	}
-
-	return benchmark
-}
-
-func writeCSV(params benchParams, benchmark benchmark) {
-	file, err := os.Create(filepath.Join(params.out, "benchmark.csv"))
-	if err != nil {
-		panic("failed to create file")
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	var data [][]string = [][]string{{"AVG"}, {strconv.Itoa(benchmark.avg)}}
-
-	if err := writer.WriteAll(data); err != nil {
-		panic("failed to write data")
 	}
 }
 
 func main() {
 	reqCount := flag.Int("r", 100, "request amount")
 	delay := flag.Int("d", 1000, "delay between every request call in ms")
-	out := flag.String("o", "", "output path for the benchmark csv (defaults to terminal)")
+	out := flag.String("o", "", "output path for the benchmark xlsx (defaults to terminal)")
 	method := flag.String("t", "GET", "http method used on the url")
 
 	flag.Parse()
@@ -161,10 +135,15 @@ func main() {
 	wg.Wait()
 	close(timeChan)
 
-	benchmark := calculateBenchmark(params, timeChan)
+	latencies := []int{}
+	for elapsed := range timeChan {
+		latencies = append(latencies, int(time.Duration.Milliseconds(elapsed)))
+	}
+
+	benchmark := calculateBenchmark(params, latencies)
 
 	if params.out != "" {
-		writeCSV(params, benchmark)	
+		writeXLSX(params, benchmark, latencies)
 		return
 	}
 
