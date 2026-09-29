@@ -1,4 +1,4 @@
-package main
+package benchkitty
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func writeXLSX(params benchParams, benchmark benchmark, latencies []int) {
+func XLSX(params Config, result Result, latencies []int) {
 	file := excelize.NewFile()
 	defer file.Close()
 
@@ -22,13 +22,13 @@ func writeXLSX(params benchParams, benchmark benchmark, latencies []int) {
 	file.SetCellValue("Summary", "A1", "Metric")
 	file.SetCellValue("Summary", "B1", "Value")
 	file.SetCellValue("Summary", "A2", "Avg")
-	file.SetCellValue("Summary", "B2", benchmark.avg)
+	file.SetCellValue("Summary", "B2", result.Avg)
 	file.SetCellValue("Summary", "A3", "P50")
-	file.SetCellValue("Summary", "B3", benchmark.p50)
+	file.SetCellValue("Summary", "B3", result.P50)
 	file.SetCellValue("Summary", "A4", "P95")
-	file.SetCellValue("Summary", "B4", benchmark.p95)
+	file.SetCellValue("Summary", "B4", result.P95)
 	file.SetCellValue("Summary", "A5", "P99")
-	file.SetCellValue("Summary", "B5", benchmark.p99)
+	file.SetCellValue("Summary", "B5", result.P99)
 
 	file.SetCellValue("Latency", "A1", "Request")
 	file.SetCellValue("Latency", "B1", "Latency (ms)")
@@ -87,7 +87,7 @@ func writeXLSX(params benchParams, benchmark benchmark, latencies []int) {
 		panic("failed to add distribution chart")
 	}
 
-	if err := file.SaveAs(filepath.Join(params.out, "benchmark.xlsx")); err != nil {
+	if err := file.SaveAs(filepath.Join(params.Out, "benchmark.xlsx")); err != nil {
 		panic("failed to save xlsx")
 	}
 }
