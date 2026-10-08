@@ -10,6 +10,7 @@
 
 # Test binaries (built with 'go test -c')
 *.test
+*.xlsx
 
 # Output of the go coverage tool (e.g., from 'go test -coverprofile=c.out')
 *.out
