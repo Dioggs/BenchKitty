@@ -49,8 +49,13 @@ func TestMethodAndBodyAreSent(t *testing.T) {
 }
 
 func TestSchedulingOfJobs(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
 	mockBenchParams := Config{
-		URL:      "https://jsonplaceholder.typicode.com/todos/1",
+		URL:      server.URL,
 		ReqCount: 10,
 		Delay:    100,
 		Method:   "GET",

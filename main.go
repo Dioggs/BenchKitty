@@ -33,10 +33,9 @@ func main() {
 
 	result := benchkitty.CalculateBenchmark(params, jobs, duration)
 
+	fmt.Printf("\n%+v\n", result)
+
 	if params.Out != "" {
 		benchkitty.XLSX(params, result, jobs)
-		return
 	}
-
-	fmt.Printf("\n%+v\n", result)
 }
