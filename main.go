@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -16,22 +17,26 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(params.ReqCount)
 
-	timeChan := make(chan time.Duration, params.ReqCount)
+	jobChan := make(chan benchkitty.JobInfo, params.ReqCount)
 
-	benchkitty.ScheduleJobs(params, &wg, &timeChan)
+	start := time.Now()
+	benchkitty.ScheduleJobs(params, &wg, &jobChan)
 
 	wg.Wait()
-	close(timeChan)
+	close(jobChan)
+	duration := time.Since(start)
 
-	latencies := []int{}
-	for elapsed := range timeChan {
-		latencies = append(latencies, int(time.Duration.Milliseconds(elapsed)))
+	jobs := []benchkitty.JobInfo{}
+	for job := range jobChan {
+		jobs = append(jobs, job)
 	}
 
-	result := benchkitty.CalculateBenchmark(params, latencies)
+	result := benchkitty.CalculateBenchmark(params, jobs, duration)
 
 	if params.Out != "" {
-		benchkitty.XLSX(params, result, latencies)
+		benchkitty.XLSX(params, result, jobs)
 		return
 	}
+
+	fmt.Printf("\n%+v\n", result)
 }

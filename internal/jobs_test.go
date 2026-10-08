@@ -30,7 +30,7 @@ func TestMethodAndBodyAreSent(t *testing.T) {
 		Delay:    10,
 	}
 
-	mockChan := make(chan time.Duration, mockBenchParams.ReqCount)
+	mockChan := make(chan JobInfo, mockBenchParams.ReqCount)
 	var mockWg sync.WaitGroup
 	mockWg.Add(mockBenchParams.ReqCount)
 
@@ -56,7 +56,7 @@ func TestSchedulingOfJobs(t *testing.T) {
 		Method:   "GET",
 		Out:      "",
 	}
-	mockChan := make(chan time.Duration, mockBenchParams.ReqCount)
+	mockChan := make(chan JobInfo, mockBenchParams.ReqCount)
 	var mockWg sync.WaitGroup
 	mockWg.Add(mockBenchParams.ReqCount)
 
@@ -69,13 +69,13 @@ func TestSchedulingOfJobs(t *testing.T) {
 	elapsed := time.Since(start)
 	elapsed_mili := time.Duration.Milliseconds(elapsed)
 
-	var values []time.Duration = []time.Duration{}
-	for v := range mockChan {
-		values = append(values, v)
+	var jobs []JobInfo = []JobInfo{}
+	for job := range mockChan {
+		jobs = append(jobs, job)
 	}
 
-	if len(values) != mockBenchParams.ReqCount {
-		t.Errorf("Executed the wrong amount of jobs: Executed %v Needed %v", len(values), mockBenchParams.ReqCount)
+	if len(jobs) != mockBenchParams.ReqCount {
+		t.Errorf("Executed the wrong amount of jobs: Executed %v Needed %v", len(jobs), mockBenchParams.ReqCount)
 	}
 
 	expectedMinimumTime := mockBenchParams.ReqCount * mockBenchParams.Delay

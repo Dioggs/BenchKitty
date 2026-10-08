@@ -2,11 +2,26 @@ package benchkitty
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 )
+
+type JobInfo struct {
+	Status     int
+	Throughput int64
+	Elapsed    time.Duration
+}
+
+func jobLatencies(jobs []JobInfo) []int {
+	values := make([]int, 0, len(jobs))
+	for _, job := range jobs {
+		values = append(values, int(time.Duration.Milliseconds(job.Elapsed)))
+	}
+	return values
+}
 
 func buildRequest(p Config) (*http.Request, error) {
 	if p.Body == "" {
@@ -30,7 +45,7 @@ func fmtOutput(url string, method string, status int, elapsed time.Duration) {
 	fmt.Println()
 }
 
-func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan time.Duration) {
+func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan JobInfo) {
 	count := 0
 
 	for count < p.ReqCount {
@@ -50,6 +65,7 @@ func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan time.Duration) {
 			}
 
 			status := resp.StatusCode
+			throughput, _ := io.Copy(io.Discard, resp.Body)
 			resp.Body.Close()
 
 			elapsed := time.Since(start)
@@ -58,7 +74,11 @@ func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan time.Duration) {
 				fmtOutput(p.URL, p.Method, status, elapsed)
 			}
 
-			*ch <- elapsed
+			*ch <- JobInfo{
+				Elapsed:    elapsed,
+				Status:     status,
+				Throughput: throughput,
+			}
 			wg.Done()
 		}()
 
