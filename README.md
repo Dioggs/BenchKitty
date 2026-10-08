@@ -103,7 +103,22 @@ BenchKitty -p -r 10 -t GET https://example.com
 After the run, BenchKitty prints a summary like this:
 
 ```text
-{Avg:26 P50:21 P95:50 P99:50 RPS:18 TPS:1517 StatusCount:map[200:5]}
+╭─────────────────────────────╮
+│ BenchKitty Benchmark Report │
+├─────────────────────────────┤
+│ Latency                     │
+│   Avg                73 ms  │
+│   P50                72 ms  │
+│   P95                82 ms  │
+│   P99                82 ms  │
+├─────────────────────────────┤
+│ Throughput                  │
+│   Requests/sec    36 req/s  │
+│   Bandwidth     20.36 KB/s  │
+├─────────────────────────────┤
+│ Status codes                │
+│   200             3 (100%)  │
+╰─────────────────────────────╯
 ```
 
 | Metric        | Meaning                                                          |

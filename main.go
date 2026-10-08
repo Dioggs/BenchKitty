@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -33,7 +32,7 @@ func main() {
 
 	result := benchkitty.CalculateBenchmark(params, jobs, duration)
 
-	fmt.Printf("\n%+v\n", result)
+	benchkitty.PrintResult(result)
 
 	if params.Out != "" {
 		benchkitty.XLSX(params, result, jobs)
