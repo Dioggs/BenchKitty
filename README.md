@@ -135,6 +135,12 @@ Common tasks are wrapped in the `Makefile`:
 
 ```bash
 make run     # quick smoke run against a sample endpoint
+make build   # compile the BenchKitty binary
+make test    # run the test suite
+make fmt     # format the code with gofmt
+make vet     # run static checks with go vet
+make check   # fmt + vet + test
+make clean   # remove build artifacts
 ```
 
 Run the test suite:
