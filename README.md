@@ -42,7 +42,7 @@ BenchKitty was made with the intention of being a very simple project to practic
 Requires [Go](https://go.dev/) 1.26+.
 
 ```bash
-git clone <your-repo-url> BenchKitty
+git clone https://github.com/Dioggs/BenchKitty
 cd BenchKitty
 go build -o BenchKitty .
 ```

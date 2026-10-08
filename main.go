@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	benchkitty "BenchKitty/internal"
+	benchkitty "github.com/Dioggs/BenchKitty/internal"
 )
 
 func main() {
