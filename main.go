@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 func main() {
 	params, ok := benchkitty.Parse()
 	if !ok {
-		return
+		panic("Params were unable to be parsed")
 	}
 
 	var wg sync.WaitGroup
@@ -35,6 +34,4 @@ func main() {
 		benchkitty.XLSX(params, result, latencies)
 		return
 	}
-
-	fmt.Printf("\n%+v\n", result)
 }

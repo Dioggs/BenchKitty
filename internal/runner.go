@@ -46,7 +46,7 @@ func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan time.Duration) {
 
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
-				panic("Request Failed")
+				panic("Unable to execute request")
 			}
 
 			status := resp.StatusCode

@@ -9,14 +9,13 @@ https://url.com == url called
 
 ====TODO====
 [x] implement command params
-[x] implement full benchmark
+[x] implement part of the benchmark
 [x] refactor csv output logic
 [x] accept url method as param
 [x] accept body as param
 [x] implement detailed view of every url call
-[] implement loading animation
-[] implement better error handling
-[] implement tests
+[x] implement better error handling
+[] implement full benchmark
 [] create BenchKitty website
 
 ====NOTES====
