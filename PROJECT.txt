@@ -11,12 +11,13 @@ https://url.com == url called
 [x] implement command params
 [x] implement full benchmark
 [x] refactor csv output logic
-[] accept url method as param
-[] accept body as param
+[x] accept url method as param
+[x] accept body as param
 [] implement detailed view of every url call
 [] create BenchKitty website
 [] implement better error handling
 [] implement tests
+[] implement concurrency limit
 
 ====NOTES====
 https://jsonplaceholder.typicode.com/todos/1

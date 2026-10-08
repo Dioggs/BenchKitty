@@ -1,10 +1,52 @@
 package benchkitty
 
 import (
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"sync"
 	"testing"
 	"time"
 )
+
+func TestMethodAndBodyAreSent(t *testing.T) {
+	type request struct {
+		method string
+		body   string
+	}
+	captured := make(chan request, 1)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		captured <- request{method: r.Method, body: string(body)}
+	}))
+	defer server.Close()
+
+	mockBenchParams := Config{
+		URL:      server.URL,
+		Method:   "POST",
+		Body:     `{"hello":"world"}`,
+		ReqCount: 1,
+		Delay:    10,
+	}
+
+	mockChan := make(chan time.Duration, mockBenchParams.ReqCount)
+	var mockWg sync.WaitGroup
+	mockWg.Add(mockBenchParams.ReqCount)
+
+	ScheduleJobs(mockBenchParams, &mockWg, &mockChan)
+
+	mockWg.Wait()
+	close(mockChan)
+
+	got := <-captured
+	if got.method != mockBenchParams.Method {
+		t.Errorf("Sent the wrong method: Got %v Needed %v", got.method, mockBenchParams.Method)
+	}
+	if got.body != mockBenchParams.Body {
+		t.Errorf("Sent the wrong body: Got %v Needed %v", got.body, mockBenchParams.Body)
+	}
+}
 
 func TestSchedulingOfJobs(t *testing.T) {
 	mockBenchParams := Config{

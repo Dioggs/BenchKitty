@@ -3,9 +3,23 @@ package benchkitty
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
+
+func buildRequest(p Config) (*http.Request, error) {
+	if p.Body == "" {
+		return http.NewRequest(p.Method, p.URL, nil)
+	}
+
+	req, err := http.NewRequest(p.Method, p.URL, strings.NewReader(p.Body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return req, nil
+}
 
 func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan time.Duration) {
 	count := 0
@@ -16,7 +30,12 @@ func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan time.Duration) {
 		go func() {
 			start := time.Now()
 
-			if _, err := http.Get(p.URL); err != nil {
+			req, err := buildRequest(p)
+			if err != nil {
+				panic("Unable to build request")
+			}
+
+			if _, err := http.DefaultClient.Do(req); err != nil {
 				panic("Request Failed")
 			}
 
