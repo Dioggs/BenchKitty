@@ -41,7 +41,7 @@ func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan time.Duration) {
 
 			elapsed := time.Since(start)
 
-			fmt.Printf("Job Done = %vms\n", time.Duration.Milliseconds(elapsed))
+			fmt.Printf("%v Job Done = %vms\n", p.Method, time.Duration.Milliseconds(elapsed))
 
 			*ch <- elapsed
 			wg.Done()

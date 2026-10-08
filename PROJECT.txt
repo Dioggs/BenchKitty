@@ -17,7 +17,6 @@ https://url.com == url called
 [] create BenchKitty website
 [] implement better error handling
 [] implement tests
-[] implement concurrency limit
 
 ====NOTES====
 https://jsonplaceholder.typicode.com/todos/1
