@@ -27,7 +27,7 @@ URL and a handful of flags.
 
 BenchKitty was made with the intention of being a very simple project to practice some Golang concepts, so don't treat it like the Linux kernel
 
-## 🚀 Features
+## Features
 
 - Any common HTTP method — `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
 - Request bodies for `POST` / `PUT` / `PATCH` (sent as `application/json`)
@@ -37,7 +37,7 @@ BenchKitty was made with the intention of being a very simple project to practic
 - Optional Excel report with summary, latency and status analyses + charts
 - Optional pretty-print of each individual call
 
-## 📦 Installation
+## Installation
 
 Requires [Go](https://go.dev/) 1.26+.
 
@@ -59,7 +59,7 @@ Or, without building:
 go run . -r 100 -d 500 https://example.com
 ```
 
-## 🕹️ Usage
+## Usage
 
 ```bash
 BenchKitty [flags] <url>
@@ -77,7 +77,7 @@ BenchKitty [flags] <url>
 | `-p` | Pretty-print every individual job                                        | `false`    |
 | `<url>` | Target endpoint (required)                                            | —          |
 
-> ℹ️ Passing `-b` with a method that cannot carry a body (like `GET`) is
+> Passing `-b` with a method that cannot carry a body (like `GET`) is
 > rejected before the benchmark starts.
 
 ### Examples
@@ -98,7 +98,7 @@ BenchKitty -r 500 -d 0 -o ./reports https://example.com
 BenchKitty -p -r 10 -t GET https://example.com
 ```
 
-## 📊 The report
+## The report
 
 After the run, BenchKitty prints a summary like this:
 
@@ -126,7 +126,7 @@ sheets:
 | `Latency`  | Per-request latency, sorted distribution and line/bar charts    |
 | `Status`   | Status code distribution with a pie chart                       |
 
-> ⚠️ The file always uses the same name, so re-running with the same `-o`
+> The file always uses the same name, so re-running with the same `-o`
 > **overwrites** the previous `benchmark.xlsx`.
 
 ## 🛠️ Development
