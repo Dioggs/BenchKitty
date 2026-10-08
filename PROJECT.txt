@@ -13,10 +13,11 @@ https://url.com == url called
 [x] refactor csv output logic
 [x] accept url method as param
 [x] accept body as param
-[] implement detailed view of every url call
-[] create BenchKitty website
+[x] implement detailed view of every url call
+[] implement loading animation
 [] implement better error handling
 [] implement tests
+[] create BenchKitty website
 
 ====NOTES====
 https://jsonplaceholder.typicode.com/todos/1

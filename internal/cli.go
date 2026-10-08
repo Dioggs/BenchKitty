@@ -12,6 +12,7 @@ type Config struct {
 	Delay    int
 	ReqCount int
 	Out      string
+	Pretty   bool
 }
 
 var methods = map[string]bool{
@@ -28,6 +29,7 @@ func Parse() (Config, bool) {
 	out := flag.String("o", "", "output path for the benchmark xlsx (defaults to terminal)")
 	method := flag.String("t", "GET", "http method used on the url")
 	body := flag.String("b", "", "request body (only for POST, PUT, PATCH)")
+	pretty := flag.Bool("p", false, "enable pretty print of jobs being executed")
 
 	flag.Parse()
 
@@ -56,5 +58,6 @@ func Parse() (Config, bool) {
 		Delay:    *delay,
 		ReqCount: *reqCount,
 		Out:      *out,
+		Pretty:   *pretty,
 	}, true
 }

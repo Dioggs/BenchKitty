@@ -21,6 +21,15 @@ func buildRequest(p Config) (*http.Request, error) {
 	return req, nil
 }
 
+func fmtOutput(url string, method string, status int, elapsed time.Duration) {
+	fmt.Println()
+	fmt.Printf("URL: %v\n", url)
+	fmt.Printf("Method: %v\n", method)
+	fmt.Printf("Status: %v\n", status)
+	fmt.Printf("Elapsed: %vms\n", time.Duration.Milliseconds(elapsed))
+	fmt.Println()
+}
+
 func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan time.Duration) {
 	count := 0
 
@@ -35,13 +44,19 @@ func ScheduleJobs(p Config, wg *sync.WaitGroup, ch *chan time.Duration) {
 				panic("Unable to build request")
 			}
 
-			if _, err := http.DefaultClient.Do(req); err != nil {
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
 				panic("Request Failed")
 			}
 
+			status := resp.StatusCode
+			resp.Body.Close()
+
 			elapsed := time.Since(start)
 
-			fmt.Printf("%v Job Done = %vms\n", p.Method, time.Duration.Milliseconds(elapsed))
+			if p.Pretty {
+				fmtOutput(p.URL, p.Method, status, elapsed)
+			}
 
 			*ch <- elapsed
 			wg.Done()
